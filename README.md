@@ -2,7 +2,7 @@
 
 # Bitcoin-Wasm
 
-**Bitcoin Wasm** is a **WASM-WASI compliant** embedded Bitcoin payment node. It's designed to be embedded in native applications using WASI-compliant runtime SDKs like **wasmtime** and **JCO**. This node provides all the necessary functionalities to send, receive, and convert Bitcoin in a non-custodial way using open standards.
+**Bitcoin Wasm** is a **WASM-WASI compliant** universally pluggable Bitcoin Light Client. It's designed to be embedded in native applications using WASI-compliant runtime SDKs like **wasmtime** and **JCO**. This client provides all the necessary functionalities to send, receive, and convert Bitcoin in a non-custodial way using open standards.
 
 ![image]()
 
@@ -21,6 +21,7 @@
     - [:nut\_and\_bolt: Development Environment](#nut_and_bolt-development-environment)
     - [:file\_folder: Folder Structure](#file_folder-folder-structure)
     - [:hammer: Build](#hammer-build)
+    - [:office: Examples](#-examples)
   - [:cherry\_blossom: Community](#cherry_blossom-community)
     - [:fire: Contribution](#fire-contribution)
     - [:cactus: Branches](#cactus-branches)
@@ -31,6 +32,10 @@
   - [:star2: Credit/Acknowledgment](#star2-creditacknowledgment)
   - [:lock: License](#lock-license)
 
+## Why WASM ?
+
+WebAssembly (Wasm) is a low-level binary format for executable code that can be run in web browsers and other environments which provides sandboxed execution, memory safety, limited access to system resources, validation and verification . These features makes it appealing for the development of plugin. The further Development of `WASI` (WebAssembly System Interface), a standard that defines a set of system calls that WebAssembly modules can use to interact with the underlying operating system, made it quite possible to develop a fully fledged bitcoin light client as plugin.
+
 ## :beginner: About
 
 Bitcoin Wasm contains two sub-projects: the embeddable, self-contained Bitcoin Light Client called **Node** and the Bitcoin Transaction Signing Utility Software called **Signer**.
@@ -40,6 +45,7 @@ flowchart TD
     A[Bitcoin Wasm] --> B(Node)
     A --> C(Signer)
 ```
+
 
 ### Node
 
@@ -60,29 +66,17 @@ Signer is a powerful utility that handles the cryptographic aspects of Bitcoin t
 
 ## :station: Features
 
-- [ ] Light Client (Compact Block Filtering)
+- [x] Light Client (Compact Block Filtering)
 - [ ] Descriptor Wallet
 - [ ] Silent Payment Support
-- [ ] tbDEX exchange feature
+- [x] tbDEX exchange feature
 - [ ] Wasm Signer
   - [ ] PSBT support
 
 ## :zap: Usage
 
-This project is designed to be embedded within another project using WASI SDKs like wasmtime.
+The executables are WASM modules which are designed to be embedded within applications using WASI runtime like wasmtime.
 
-### :electric_plug: Installation
-
-1. Clone the Bitcoin-Wasm repository:
-
-   ```bash
-   $ git clone https://github.com/aruokhai/bitcoin-wasm.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
-   $ cd bitcoin-wasm
-   ```
 
 ## :wrench: Development
 
@@ -97,55 +91,42 @@ We warmly welcome your contributions to Bitcoin Wasm! Whether you're a seasoned 
 
 A. **Setting Up Your Development Environment**
 
-1. Install WASM runtime (e.g., `wasmtime`):
-
-   ```bash
-   $ curl https://wasmtime.dev/install.sh -sSf | bash
-   ```
-
-2. **Clone the Repository:**
+1. **Clone the Repository:**
 
    ```bash
    $ git clone https://github.com/aruokhai/bitcoin-wasm.git
    ```
 
-3. Navigate to the project directory:
+2. Navigate to the project directory:
 
    ```bash
    $ cd bitcoin-wasm
    ```
 
-4. **Install Rust and Dependencies:**
-   Ensure you have Rust installed (version 1.78 or later) with the necessary WASM and Bitcoin-related crates. You can use Rustup to manage your Rust installations:
+3. Install Cargo Component:
 
    ```bash
-   $ rustup install stable
+   $ cargo install cargo-component
    ```
 
-5. **Build the Project:**
-   Navigate to the project directory and build the project:
+4. Install `wac-cli` used for building wasm  :
+
    ```bash
-   $ cd bitcoin-wasm
-   $ cargo build
+   $ cargo install wac-cli
    ```
+
 
 B. **Running Tests**
 
 To run the project's integration tests, follow these steps:
 
-1. Install the `cargo-component` and `wac-cli` tools:
+1. [Install Docker Engine](https://docs.docker.com/engine/install/)
+
+2. Run the integration tests:
 
    ```bash
-   $ cargo install cargo-component
-   $ cargo install wac-cli
-   ```
-
-2. Navigate to the project directory.
-
-3. Run the integration tests:
-
-   ```bash
-   $ cargo run --package runner --bin runner
+   $ cd tests
+   $ ./test-runner.sh
    ```
 
 ### :file_folder: Folder Structure
@@ -170,7 +151,7 @@ bitcoin-wasm
 │   └── wit
 |   |   └──world.wit
 │   └── cargo.toml
-├──test-programs
+├──tests
 │   ├── artifacts
 │   |   ├── src
 │   │   └── wit
@@ -188,13 +169,13 @@ bitcoin-wasm
 
 Here's a breakdown of the key folders:
 
-- **crates:** This folder holds crates (Rust libraries) used by the project. It contains subfolders like:
-  - **store:** A WASI-compliant generic key-value store.
-  - **tbdex:** For interacting with the tbDEX platform.
-- **node:** This subfolder contains the source code for the Node component, responsible for interacting with the Bitcoin network.
-- **test-programs:** This folder holds test programs used to verify the functionality of the project. It contains subfolders like:
-  - **artifacts:** This stores generated test data or artifacts.
-  - **runner:** The main entry point for the end-to-end(e2e) testing. It holds code for running and managing the test programs.
+- **crates:** This folder holds common WASI-compliant components used by the project. It contains components like:
+   - **store:** A generic key-value store.
+   - **tbdex:** The tbDex protocol.
+   - **node:** This subfolder contains the source code for the Node plugin, responsible for interacting with the Bitcoin network.
+- **test:** This folder holds integration tests used to verify the functionality of the project. It contains two subfolders:
+  - **artifacts:** This contains various components test logic.
+  - **runner:** The main entry point for the integration test.
 
 ### :hammer: Build
 
@@ -208,6 +189,11 @@ There is currently one way to build the Bitcoin-Wasm project:
    ```
 
    Replace `package-name` with the actual name of the package you want to build (e.g `web5`).
+
+### :office: Usage
+
+An example of the usage of the `Node` plugin can be found in the `examples` folder. Which includes a dummy mobile money CLI application created for the TBDX 2024 Hackathon.
+
 
 ## :cherry_blossom: Community
 
@@ -269,17 +255,5 @@ After this, changes will be merged.
 ## :page_facing_up: Resources
 
 - **WASM Specification:** [https://webassembly.org/](https://webassembly.org/)
-- **WASI Specification:** [https://github.com/WebAssembly/wasi-io](https://github.com/WebAssembly/wasi-io)
+- **WASI Specification:** [https://wasi.dev/](https://wasi.dev/)
 - **Bitcoin Documentation:** [https://bitcoin.org/](https://bitcoin.org/)
-
-## :camera: Gallery
-
-Pictures of your project.
-
-## :star2: Credit/Acknowledgment
-
-Credit the authors here.
-
-## :lock: License
-
-Add a license here, or a link to it.
